@@ -1,0 +1,23 @@
+{
+  "name": "autoflowchart",
+  "version": "1.0.0",
+  "description": "Pascal code to flowchart converter",
+  "main": "main.js",
+  "scripts": {
+    "test": "main.js "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/notblank00/autoflowchart.git"
+  },
+  "author": "Igor Gunin (notblank00)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/notblank00/autoflowchart/issues"
+  },
+  "homepage": "https://github.com/notblank00/autoflowchart#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "pureimage": "^0.2.5"
+  }
+}
