@@ -42,11 +42,12 @@ module.exports = {
 			if(value != '') {tokens.push(new token('name', value.toLowerCase())); i--; continue};
 			if(infile[i] == '\'') {
 				i++;
-				value = ''
+				value = '"';
 				while(infile[i] != '\'') {
 					value += infile[i];
 					i++;
 				}
+				value += '"';
 				tokens.push(new token('string', value));
 			}
 			if(infile[i] == '{') {

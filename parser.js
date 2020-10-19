@@ -9,7 +9,7 @@ function node(nodes, type, text) {
     nodes.push({type : type, text : text});
 }
 
-function connect(from, to, primary = 'primary', override = '') {
+function connect(from, to, primary = 'primary', override = '', loop = '') {
     if(promise[0]) {
         temp = promise[0];
         promise.shift();
@@ -73,40 +73,40 @@ module.exports = {
                         escLinker.pop();
                         continue;
                     }
-                    while(escAction[escAction.length - 1] == 'linkThen') {
+                    if(escAction[escAction.length - 1] == 'linkThen') {
                         promise.push(escLinker[escLinker.length - 1]);
                         scope.pop();
                         esc.pop();
                         escAction.pop();
                         escLinker.pop();
+                        i--;
                     }
-                    while(escAction[escAction.length - 1] == 'linkElse') {
+                    if(escAction[escAction.length - 1] == 'linkElse') {
                         promise.push(escLinker[escLinker.length - 1]);
                         scope.pop();
                         esc.pop();
                         escAction.pop();
                         escLinker.pop();
-                    }
-                    while(escAction[escAction.length - 1] == 'linkBack') {
-                        last = connect(last, escLinker[escLinker.length - 1], primary = 'no');
-                        scope.pop();
-                        esc.pop();
-                        escAction.pop();
-                        escLinker.pop();
-                    }
-                    while(escAction[escAction.length - 1] == 'setLinker') {
-                        promise.push(escLinker[escLinker.length - 1]);
-                        scope.pop();
-                        esc.pop();
-                        escAction.pop();
-                        escLinker.pop();
+                        i--;
                     }
                     if(escAction[escAction.length - 1] == 'linkBack') {
-                        last = connect(last, escLinker[escLinker.length - 1], primary = 'no');
+                        if(escLinker[escLinker.length - 1].type == 'incremental')
+                            last = connect(last, escLinker[escLinker.length - 1], primary = 'no', '');
+                        else
+                            last = connect(last, escLinker[escLinker.length - 1], primary = 'no');
                         scope.pop();
                         esc.pop();
                         escAction.pop();
                         escLinker.pop();
+                        i--;
+                    }
+                    if(escAction[escAction.length - 1] == 'setLinker') {
+                        promise.push(escLinker[escLinker.length - 1]);
+                        scope.pop();
+                        esc.pop();
+                        escAction.pop();
+                        escLinker.pop();
+                        i--;
                     }
                 }
 
@@ -120,7 +120,7 @@ module.exports = {
                         escLinker.pop();
                     }
                 }
-                
+
                 if(tokens[i].value == 'for') {
                     noAction = false;
                     i++;

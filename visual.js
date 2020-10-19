@@ -1,5 +1,6 @@
 const pureimage = require('pureimage');
 const fs = require('fs');
+const { createContext } = require('vm');
 
 // TODO: fix overlapping horizontals
 
@@ -15,6 +16,8 @@ module.exports = {
             lbound = x;
             rbound = x;
             incScope = [];
+            let lines = [];
+            let nLines = [];
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, 2000, 4000);
             ctx.fillStyle = 'black';
@@ -100,14 +103,92 @@ module.exports = {
                 }
             }
 
-            function drawLink(from, to, ifrom, ito, type) {
+            function intersects(x1, y1, x2, y2, x3, y3, x4, y4) {
+                if(x1 == x2)
+                    orientation1 = 'vertical';
+                else
+                    orientation1 = 'horizontal';
+                if(x3 == x4)
+                    orientation2 = 'vertical';
+                else
+                    orientation2 = 'horizontal';
+                if(orientation1 == orientation2) {
+                    return false;
+                }
+                if(x1 > x2)
+                    [x1, x2] = [x2, x1];
+                if(y1 > y2)
+                    [y1, y2] = [y2, y1];
+                if(x3 > x4)
+                    [x3, x4] = [x4, x3];
+                if(y3 > y4)
+                    [y3, y4] = [y4, y3];
+                if(orientation1 == 'vertical') {
+                    return (y1 <= y3 && y2 >= y3 && x3 <= x1 && x4 >= x1);
+                }
+                else {
+                    return (y3 <= y1 && y4 >= y1 && x1 <= x3 && x1 >= x3);
+                }
+            }
+
+            function mergeLines() {
+                nLines.forEach(line => {
+                    lines.push(line);
+                });
+            }
+
+            function drawLine(destination, x, y) {
+                x = Math.round(x);
+                y = Math.round(y);
+                from = ctx.path[ctx.path.length - 1][1];
+                from.x = Math.round(from.x);
+                from.y = Math.round(from.y);
+                if(from.x == x && from.y == y)
+                    return false;
+                let i = 0;
+                while(i < lines.length && (lines[i].destination != destination || !intersects(from.x, from.y, x, y, lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2))) i++;
+                if(i < lines.length) {
+                    if(x == from.x) {
+                        ctx.lineTo(x, lines[i].y1);
+                        if(from.y < y) {
+                            ctx.lineTo(x - 5, lines[i].y1 - 15);
+                            ctx.moveTo(x, lines[i].y1);
+                            ctx.lineTo(x + 5, lines[i].y1 - 15);
+                        }
+                        else {
+                            ctx.lineTo(x - 5, lines[i].y1 + 15);
+                            ctx.moveTo(x, lines[i].y1);
+                            ctx.lineTo(x + 5, lines[i].y1 + 15);
+                        }
+                        nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : lines[i].y1, destination : destination});
+                    }
+                    else {
+                        ctx.lineTo(lines[i].x1, y);
+                        if(from.x > x) {
+                            ctx.lineTo(lines[i].x1 + 15, lines[i].y1 - 5);
+                            ctx.moveTo(lines[i].x1, lines[i].y1);
+                            ctx.lineTo(lines[i].x1 + 15, linds[i].y1 + 5);
+                        }
+                        else {
+                            ctx.lineTo(lines[i].x1 - 15, y - 5);
+                            ctx.moveTo(lines[i].x1, y);
+                            ctx.lineTo(lines[i].x1 - 15, y + 5);
+                        }
+                        mergeLines();
+                        nLines.push({x1 : from.x, y1 : from.y, x2 : lines[i].x1, y2 : y, destination : destination});
+                    }
+                    return true;
+                }
+                ctx.lineTo(x, y);
+                nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : y, destination : destination});
+                return false;
+            }
+
+            function drawLink(from, to, ifrom, ito, destination) {
                 lpref = 0;
                 toOffs = 0;
                 fromOffs = 0;
-                if(ifrom < ito)
-                    ctx.strokeStyle = 'blue';
-                else 
-                    ctx.strokeStyle = 'red';
+                terminate = false;
                 ctx.beginPath();
                 ctx.moveTo(from.x, from.y);
                 if(from.dir == 'left')
@@ -122,17 +203,21 @@ module.exports = {
                     lpref--;
                 if(to.dir == 'up')
                     toOffs = 20;
-                
-                ctx.lineTo(from.x, from.y + fromOffs);
+                terminate = drawLine(destination, from.x, from.y + fromOffs);
+                if(terminate) {ctx.stroke(); return};
                 if(lpref > 0) {
-                    ctx.lineTo(lbound, from.y + fromOffs);
-                    ctx.lineTo(lbound, to.y - toOffs);
-                    lbound -= 20;
+                    terminate = drawLine(destination, lbound, from.y + fromOffs);
+                    if(terminate) {ctx.stroke(); lbound -= 40; return};
+                    terminate = drawLine(destination, lbound, to.y - toOffs);
+                    if(terminate) {ctx.stroke(); lbound -= 40; return};
+                    lbound -= 40;
                 }
                 else if(lpref < 0) {
-                    ctx.lineTo(rbound, from.y + fromOffs);
-                    ctx.lineTo(rbound, to.y - toOffs);
-                    rbound += 20;
+                    terminate = drawLine(destination, rbound, from.y + fromOffs);
+                    if(terminate) {ctx.stroke(); rbound += 40; return};
+                    terminate = drawLine(destination, rbound, to.y - toOffs);
+                    if(terminate) {ctx.stroke(); rbound += 40; return};
+                    rbound += 40;
                 } else if(from.dir != 'down' || to.dir != 'up' || ito != ifrom + 1) {
                     let opt;
                     pinc = 0;
@@ -146,23 +231,44 @@ module.exports = {
                         if(!opt || nodes[i].inBetween < nodes[opt].inBetween)
                             opt = i;
                     if(from.dir == 'left') {
-                        ctx.lineTo(lbound, from.y + fromOffs);
-                        ctx.lineTo(lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        ctx.lineTo(rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        ctx.lineTo(rbound, to.y - toOffs);
+                        terminate = drawLine(destination, lbound, from.y + fromOffs);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, rbound, to.y - toOffs);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
                     }
                     else {
-                        ctx.lineTo(rbound, from.y + fromOffs);
-                        ctx.lineTo(rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        ctx.lineTo(lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        ctx.lineTo(lbound, to.y - toOffs);
+                        terminate = drawLine(destination, rbound, from.y + fromOffs);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        terminate = drawLine(destination, lbound, to.y - toOffs);
+                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
                     }
-                    rbound += 20;
-                    lbound -= 20;
+                    rbound += 40;
+                    lbound -= 40;
                 }
-                ctx.lineTo(to.x, to.y - toOffs);
-                ctx.lineTo(to.x, to.y);
+                terminate = drawLine(destination, to.x, to.y - toOffs);
+                if(terminate) {ctx.stroke(); return};
+                terminate = drawLine(destination, to.x, to.y);
+                if(terminate) {ctx.stroke(); return};
+                if(to.dir == 'left') {
+                    ctx.lineTo(to.x - 15, to.y - 5);
+                    ctx.moveTo(to.x, to.y);
+                    ctx.lineTo(to.x - 15, to.y + 5);
+                }
+                else {
+                    ctx.lineTo(to.x - 5, to.y - 15);
+                    ctx.moveTo(to.x, to.y);
+                    ctx.lineTo(to.x + 5, to.y - 15);
+                }
                 ctx.stroke();
+                mergeLines();
             }
             nodes.forEach(node => {
                 drawNode(node, x, y);
@@ -172,20 +278,11 @@ module.exports = {
                 rbound = Math.max(rbound, x + node.w / 2 + 20);
                 node.inBetween = 30;
             });
-            links.forEach(link => {
-                if(nodes[link.to].type == 'incremental') {
-                    if(incScope[incScope.length - 1] == link.to) {
-                        link.out = 'loop';
-                        incScope.pop();
-                    }
-                    else
-                        incScope.push(link.to);
-                }
-            });
             links.sort(function cmp(a, b) {
                 return Math.abs(a.to - a.from) < Math.abs(b.to - b.from);
             });
-            links.forEach(link => {
+            for(let i = 0; i < links.length; i++) {
+                link = links[i];
                 if(link.type == 'then')
                     from = nodes[link.from].then;
                 else if(link.type == 'else')
@@ -194,8 +291,8 @@ module.exports = {
                     to = nodes[link.to].loop;
                 else
                     to = nodes[link.to].par;
-                drawLink(from, to, link.from, link.to, link.type);
-            });
+                drawLink(from, to, link.from, link.to, link.to);
+            };
             pureimage.encodePNGToStream(img, fs.createWriteStream(file));
             return;
         });
