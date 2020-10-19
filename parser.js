@@ -1,7 +1,5 @@
 var promise = [];
 
-// l5_v6 bugged
-
 var links = [];
 
 function node(nodes, type, text) {

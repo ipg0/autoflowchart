@@ -1,6 +1,8 @@
 const pureimage = require('pureimage');
 const fs = require('fs');
 
+// TODO: fix overlapping horizontals
+
 module.exports = {
     visualize(nodes, links, file) {
         img = pureimage.make(2000, 4000);
@@ -12,6 +14,7 @@ module.exports = {
             y = 200;
             lbound = x;
             rbound = x;
+            incScope = [];
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, 2000, 4000);
             ctx.fillStyle = 'black';
@@ -169,23 +172,29 @@ module.exports = {
                 rbound = Math.max(rbound, x + node.w / 2 + 20);
                 node.inBetween = 30;
             });
+            links.forEach(link => {
+                if(nodes[link.to].type == 'incremental') {
+                    if(incScope[incScope.length - 1] == link.to) {
+                        link.out = 'loop';
+                        incScope.pop();
+                    }
+                    else
+                        incScope.push(link.to);
+                }
+            });
             links.sort(function cmp(a, b) {
                 return Math.abs(a.to - a.from) < Math.abs(b.to - b.from);
             });
             links.forEach(link => {
                 if(link.type == 'then')
                     from = nodes[link.from].then;
-                else
+                else if(link.type == 'else')
                     from = nodes[link.from].else;
-
-                if(nodes[link.to].type == 'incremental' && nodes[link.to].fpar)
+                if(nodes[link.to].type == 'incremental' && link.out == 'loop')
                     to = nodes[link.to].loop;
                 else
                     to = nodes[link.to].par;
-                if(nodes[link.to].type == 'incremental')
-                    nodes[link.to].fpar = true;
                 drawLink(from, to, link.from, link.to, link.type);
-
             });
             pureimage.encodePNGToStream(img, fs.createWriteStream(file));
             return;
