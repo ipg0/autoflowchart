@@ -9,8 +9,8 @@ function token(type, value) {
 module.exports = {
 	tokenize(infile) {
 		let tokens = []
-		for(let i = 0; i < infile.length; i++)
-			if(infile[i] == '/' && infile[i + 1] == '/') {
+		for(let i = 0; i < infile.length; i++) {
+			if(infile[i] == '/' && infile[i + 1] == '/')
 				while(infile[i] != '\n')
 					i++;
 			if(/[\(\)\[\]\{\}]/.test(infile[i]))
