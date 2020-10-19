@@ -130,14 +130,17 @@ module.exports = {
                     ctx.lineTo(rbound, from.y + fromOffs);
                     ctx.lineTo(rbound, to.y - toOffs);
                     rbound += 20;
-                } else if(from.dir != 'down' || to.dir != 'up' && ito != ifrom + 1) {
-                    opt = ifrom;
+                } else if(from.dir != 'down' || to.dir != 'up' || ito != ifrom + 1) {
+                    let opt;
+                    pinc = 0;
                     if(ifrom < ito)
                         inc = 1;
-                    else
+                    else {
                         inc = -1;
-                    for(i = ifrom; i != ito + inc; i += inc)
-                        if(nodes[i].inBetween < nodes[opt].inBetween)
+                        pinc = -1;
+                    }
+                    for(i = ifrom + pinc; i != ito + inc; i += inc)
+                        if(!opt || nodes[i].inBetween < nodes[opt].inBetween)
                             opt = i;
                     if(from.dir == 'left') {
                         ctx.lineTo(lbound, from.y + fromOffs);
@@ -165,6 +168,9 @@ module.exports = {
                 lbound = Math.min(lbound, x - node.w / 2 - 20);
                 rbound = Math.max(rbound, x + node.w / 2 + 20);
                 node.inBetween = 30;
+            });
+            links.sort(function cmp(a, b) {
+                return Math.abs(a.to - a.from) < Math.abs(b.to - b.from);
             });
             links.forEach(link => {
                 if(link.type == 'then')

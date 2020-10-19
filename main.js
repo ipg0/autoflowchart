@@ -9,6 +9,4 @@ var tokens = tokenize(infile);
 
 [nodes, links] = parse(tokens);
 
-//console.log(nodes, links);
-
 visualize(nodes, links, process.argv[3]);
