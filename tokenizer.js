@@ -7,6 +7,7 @@ function token(type, value) {
 }
 
 module.exports = {
+	token : token,
 	tokenize(infile) {
 		let tokens = []
 		for(let i = 0; i < infile.length; i++) {

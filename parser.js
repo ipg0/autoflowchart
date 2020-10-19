@@ -242,7 +242,11 @@ module.exports = {
                         params += tokens[i].value;                            
                         i++;
                     }
-                    last = connect(last, new node(nodes, 'data', 'Ввод: ' + params));
+                    if(params != '')
+                        params = 'Ввод: ' + params;
+                    else
+                        params = 'Ожидание ввода';
+                    last = connect(last, new node(nodes, 'data', params));
                 }
 
                 if(tokens[i].value == 'writeln' || tokens[i].value == 'write') {

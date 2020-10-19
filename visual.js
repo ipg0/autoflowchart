@@ -2,7 +2,9 @@ const pureimage = require('pureimage');
 const fs = require('fs');
 const { createContext } = require('vm');
 
-// TODO: fix overlapping horizontals
+// TODO: fix overlapping horizontal
+
+var trace = false;
 
 module.exports = {
     visualize(nodes, links, file) {
@@ -40,8 +42,8 @@ module.exports = {
                     ctx.lineTo(x - w / 2 - 20, y + h / 2 + 20);
                     ctx.closePath();
                     ctx.stroke();
-                    node.then = {dir : 'down', x : x, y : y + h / 2 + 20};
-                    node.par = {dir : 'up', x : x, y : y - h / 2 - 20};
+                    node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
                 }
                 if(node.type == 'data') {
                     node.w += 20;
@@ -52,8 +54,8 @@ module.exports = {
                     ctx.lineTo(x - w / 2 - 30, y + h / 2 + 20);
                     ctx.closePath();
                     ctx.stroke();
-                    node.then = {dir : 'down', x : x, y : y + h / 2 + 20};
-                    node.par = {dir : 'up', x : x, y : y - h / 2 - 20};
+                    node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
                 }
                 if(node.type == 'incremental') {
                     node.w += 40;
@@ -68,10 +70,10 @@ module.exports = {
                     ctx.stroke();
                     ctx.fillText('выход', x + w / 2 + 40, y - 50);
                     ctx.fillText('возврат', x - w / 2 - 200, y - 50);
-                    node.then = {dir : 'down', x : x, y : y + h / 2 + 20};
-                    node.else = {dir : 'right', x : x + w / 2 + 40, y : y}
-                    node.par = {dir : 'up', x : x, y : y - h / 2 - 20};
-                    node.loop = {dir : 'left', x : x - w / 2 - 40, y : y};
+                    node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
+                    node.else = {dir : 'right', x : Math.trunc(x + w / 2 + 40), y : Math.trunc(y)}
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
+                    node.loop = {dir : 'left', x : Math.trunc(x - w / 2 - 40), y : Math.trunc(y)};
                 }
                 if(node.type == 'decision') {
                     node.h += 160;
@@ -85,9 +87,9 @@ module.exports = {
                     ctx.stroke();
                     ctx.fillText('да', x + w / 2 + 100, y - 50);
                     ctx.fillText('нет', x - w / 2 - 150, y - 50);
-                    node.then = {dir : 'right', x : x + w / 2 + 100, y : y};
-                    node.else = {dir : 'left', x : x - w / 2 - 100, y : y};
-                    node.par = {dir : 'up', x : x, y : y - h / 2 - 100};
+                    node.then = {dir : 'right', x : Math.trunc(x + w / 2 + 100), y : Math.trunc(y)};
+                    node.else = {dir : 'left', x : Math.trunc(x - w / 2 - 100), y : Math.trunc(y)};
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 100)};
                 }
                 if(node.type == 'terminator') {
                     ctx.beginPath();
@@ -98,8 +100,8 @@ module.exports = {
                     ctx.arc(x + w / 2, y, h / 2 + 20, Math.PI * 3.5, Math.PI * 4.5);
                     ctx.lineTo(x - w / 2, y + h / 2 + 20);
                     ctx.stroke();
-                    node.then = {dir : 'down', x : x, y : y + h / 2 + 20};
-                    node.par = {dir : 'up', x : x, y : y - h / 2 - 20};
+                    node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
                 }
             }
 
@@ -135,6 +137,7 @@ module.exports = {
                 nLines.forEach(line => {
                     lines.push(line);
                 });
+                nLines = [];
             }
 
             function drawLine(destination, x, y) {
@@ -146,7 +149,7 @@ module.exports = {
                 if(from.x == x && from.y == y)
                     return false;
                 let i = 0;
-                while(i < lines.length && (lines[i].destination != destination || !intersects(from.x, from.y, x, y, lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2))) i++;
+                /*while(i < lines.length && (lines[i].destination != destination || !intersects(from.x, from.y, x, y, lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2))) i++;
                 if(i < lines.length) {
                     if(x == from.x) {
                         ctx.lineTo(x, lines[i].y1);
@@ -174,13 +177,14 @@ module.exports = {
                             ctx.moveTo(lines[i].x1, y);
                             ctx.lineTo(lines[i].x1 - 15, y + 5);
                         }
-                        mergeLines();
                         nLines.push({x1 : from.x, y1 : from.y, x2 : lines[i].x1, y2 : y, destination : destination});
                     }
+                    ctx.stroke();
+                    mergeLines();
                     return true;
-                }
+                }*/
                 ctx.lineTo(x, y);
-                nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : y, destination : destination});
+                //nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : y, destination : destination});
                 return false;
             }
 
@@ -204,19 +208,19 @@ module.exports = {
                 if(to.dir == 'up')
                     toOffs = 20;
                 terminate = drawLine(destination, from.x, from.y + fromOffs);
-                if(terminate) {ctx.stroke(); return};
+                if(terminate) {return};
                 if(lpref > 0) {
                     terminate = drawLine(destination, lbound, from.y + fromOffs);
-                    if(terminate) {ctx.stroke(); lbound -= 40; return};
+                    if(terminate) {lbound -= 40; return};
                     terminate = drawLine(destination, lbound, to.y - toOffs);
-                    if(terminate) {ctx.stroke(); lbound -= 40; return};
+                    if(terminate) {lbound -= 40; return};
                     lbound -= 40;
                 }
                 else if(lpref < 0) {
                     terminate = drawLine(destination, rbound, from.y + fromOffs);
-                    if(terminate) {ctx.stroke(); rbound += 40; return};
+                    if(terminate) {rbound += 40; return};
                     terminate = drawLine(destination, rbound, to.y - toOffs);
-                    if(terminate) {ctx.stroke(); rbound += 40; return};
+                    if(terminate) {rbound += 40; return};
                     rbound += 40;
                 } else if(from.dir != 'down' || to.dir != 'up' || ito != ifrom + 1) {
                     let opt;
@@ -232,31 +236,31 @@ module.exports = {
                             opt = i;
                     if(from.dir == 'left') {
                         terminate = drawLine(destination, lbound, from.y + fromOffs);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, rbound, to.y - toOffs);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                     }
                     else {
                         terminate = drawLine(destination, rbound, from.y + fromOffs);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                         terminate = drawLine(destination, lbound, to.y - toOffs);
-                        if(terminate) {ctx.stroke(); lbound -= 40; rbound += 40; return};
+                        if(terminate) {lbound -= 40; rbound += 40; return};
                     }
                     rbound += 40;
                     lbound -= 40;
                 }
                 terminate = drawLine(destination, to.x, to.y - toOffs);
-                if(terminate) {ctx.stroke(); return};
+                if(terminate) {return};
                 terminate = drawLine(destination, to.x, to.y);
-                if(terminate) {ctx.stroke(); return};
+                if(terminate) {return};
                 if(to.dir == 'left') {
                     ctx.lineTo(to.x - 15, to.y - 5);
                     ctx.moveTo(to.x, to.y);
@@ -278,10 +282,16 @@ module.exports = {
                 rbound = Math.max(rbound, x + node.w / 2 + 20);
                 node.inBetween = 30;
             });
-            links.sort(function cmp(a, b) {
-                return Math.abs(a.to - a.from) < Math.abs(b.to - b.from);
+            links = links.sort(function cmp(a, b) {
+                if(Math.abs(a.to - a.from) < Math.abs(b.to - b.from))
+                    return -1;
+                else
+                    return 1;
+
             });
             for(let i = 0; i < links.length; i++) {
+                if(i == 8)
+                    trace = true;
                 link = links[i];
                 if(link.type == 'then')
                     from = nodes[link.from].then;
@@ -291,7 +301,7 @@ module.exports = {
                     to = nodes[link.to].loop;
                 else
                     to = nodes[link.to].par;
-                drawLink(from, to, link.from, link.to, link.to);
+                drawLink(from, to, link.from, link.to, to);
             };
             pureimage.encodePNGToStream(img, fs.createWriteStream(file));
             return;
