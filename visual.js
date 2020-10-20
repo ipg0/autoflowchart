@@ -2,17 +2,20 @@ const pureimage = require('pureimage');
 const fs = require('fs');
 
 hGlob = 200;
-wGlob = 5000;
 
 module.exports = {
     visualize(nodes, links, file) {
+		ltxt = '';
 		nodes.forEach(node => {
 			if(node.type == 'decision')
 				hGlob += 382;
 			else
 				hGlob += 222;
+			if(ltxt.length < node.text.length)
+				ltxt = node.text;
 		});
 		hGlob += 200;
+		wGlob = ltxt.length * 20 + 1000;
         img = pureimage.make(wGlob, hGlob);
         ctx = img.getContext('2d');
         var fnt = pureimage.registerFont('fonts/7454.ttf','Times New Roman');
