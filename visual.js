@@ -6,22 +6,32 @@ const { createContext } = require('vm');
 
 var trace = false;
 
+hGlob = 200;
+wGlob = 2000;
+
 module.exports = {
     visualize(nodes, links, file) {
-        img = pureimage.make(2000, 4000);
+		nodes.forEach(node => {
+			if(node.type == 'decision')
+				hGlob += 382;
+			else
+				hGlob += 222;
+		});
+		hGlob += 200;
+        img = pureimage.make(wGlob, hGlob);
         ctx = img.getContext('2d');
         var fnt = pureimage.registerFont('fonts/7454.ttf','Times New Roman');
         fnt.load(()=> {
             ctx.lineWidth = 5;
-            x = 1000;
+            x = wGlob / 2;
             y = 200;
             lbound = x;
             rbound = x;
             incScope = [];
             let lines = [];
             let nLines = [];
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, 2000, 4000);
+			ctx.fillStyle = 'white';
+			ctx.fillRect(0, 0, wGlob, hGlob);
             ctx.fillStyle = 'black';
             ctx.font = "48pt 'Times New Roman'";
             function blockSize(str) {
@@ -30,7 +40,7 @@ module.exports = {
             function drawNode(node, x, y) {
                 metric = blockSize(node.text);
                 w = metric.width;
-                h = metric.emHeightAscent + metric.emHeightDescent;
+				h = metric.emHeightAscent + metric.emHeightDescent;
                 node.h = h + 40;
                 node.w = w + 40;
                 ctx.fillText(node.text, x - w / 2, y + h / 2);
@@ -280,7 +290,7 @@ module.exports = {
                 y += node.h + 150;
                 lbound = Math.min(lbound, x - node.w / 2 - 20);
                 rbound = Math.max(rbound, x + node.w / 2 + 20);
-                node.inBetween = 30;
+				node.inBetween = 30;
             });
             links = links.sort(function cmp(a, b) {
                 if(Math.abs(a.to - a.from) < Math.abs(b.to - b.from))

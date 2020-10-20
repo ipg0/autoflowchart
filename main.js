@@ -15,6 +15,4 @@ tokens = sanitize(tokens);
 
 links = dfs(nodes, links, 0);
 
-console.log(links);
-
 visualize(nodes, links, process.argv[3]);
