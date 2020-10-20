@@ -1,13 +1,8 @@
 const pureimage = require('pureimage');
 const fs = require('fs');
-const { createContext } = require('vm');
-
-// TODO: fix overlapping horizontal
-
-var trace = false;
 
 hGlob = 200;
-wGlob = 2000;
+wGlob = 5000;
 
 module.exports = {
     visualize(nodes, links, file) {
@@ -26,8 +21,8 @@ module.exports = {
             x = wGlob / 2;
             y = 200;
             lbound = x;
-            rbound = x;
-            incScope = [];
+			rbound = x;
+			incScope = [];
             let lines = [];
             let nLines = [];
 			ctx.fillStyle = 'white';
@@ -159,40 +154,6 @@ module.exports = {
                 if(from.x == x && from.y == y)
                     return false;
                 let i = 0;
-                /*while(i < lines.length && (lines[i].destination != destination || !intersects(from.x, from.y, x, y, lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2))) i++;
-                if(i < lines.length) {
-                    if(x == from.x) {
-                        ctx.lineTo(x, lines[i].y1);
-                        if(from.y < y) {
-                            ctx.lineTo(x - 5, lines[i].y1 - 15);
-                            ctx.moveTo(x, lines[i].y1);
-                            ctx.lineTo(x + 5, lines[i].y1 - 15);
-                        }
-                        else {
-                            ctx.lineTo(x - 5, lines[i].y1 + 15);
-                            ctx.moveTo(x, lines[i].y1);
-                            ctx.lineTo(x + 5, lines[i].y1 + 15);
-                        }
-                        nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : lines[i].y1, destination : destination});
-                    }
-                    else {
-                        ctx.lineTo(lines[i].x1, y);
-                        if(from.x > x) {
-                            ctx.lineTo(lines[i].x1 + 15, lines[i].y1 - 5);
-                            ctx.moveTo(lines[i].x1, lines[i].y1);
-                            ctx.lineTo(lines[i].x1 + 15, linds[i].y1 + 5);
-                        }
-                        else {
-                            ctx.lineTo(lines[i].x1 - 15, y - 5);
-                            ctx.moveTo(lines[i].x1, y);
-                            ctx.lineTo(lines[i].x1 - 15, y + 5);
-                        }
-                        nLines.push({x1 : from.x, y1 : from.y, x2 : lines[i].x1, y2 : y, destination : destination});
-                    }
-                    ctx.stroke();
-                    mergeLines();
-                    return true;
-                }*/
                 ctx.lineTo(x, y);
                 //nLines.push({x1 : from.x, y1 : from.y, x2 : x, y2 : y, destination : destination});
                 return false;
@@ -287,9 +248,9 @@ module.exports = {
             nodes.forEach(node => {
                 drawNode(node, x, y);
                 node.y = y;
-                y += node.h + 150;
-                lbound = Math.min(lbound, x - node.w / 2 - 20);
-                rbound = Math.max(rbound, x + node.w / 2 + 20);
+				y += node.h + 150;
+				lbound = Math.min(lbound, x - node.w / 2 - 20);
+				rbound = Math.max(rbound, x + node.w / 2 + 20);
 				node.inBetween = 30;
             });
             links = links.sort(function cmp(a, b) {
@@ -297,12 +258,9 @@ module.exports = {
                     return -1;
                 else
                     return 1;
-
             });
             for(let i = 0; i < links.length; i++) {
-                if(i == 8)
-                    trace = true;
-                link = links[i];
+				link = links[i];
                 if(link.type == 'then')
                     from = nodes[link.from].then;
                 else if(link.type == 'else')
@@ -310,8 +268,8 @@ module.exports = {
                 if(nodes[link.to].type == 'incremental' && link.out == 'loop')
                     to = nodes[link.to].loop;
                 else
-                    to = nodes[link.to].par;
-                drawLink(from, to, link.from, link.to, to);
+					to = nodes[link.to].par;
+				drawLink(from, to, link.from, link.to, to);
             };
             pureimage.encodePNGToStream(img, fs.createWriteStream(file));
             return;

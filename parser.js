@@ -32,22 +32,40 @@ function connect(from, to, primary = 'primary', override = '', loop = '') {
 module.exports = {
     parse(tokens) {
         nodes = [];
-        const start = new node(nodes, 'terminator', 'Начало');
-        last = start;
+        last = null;
         esc = [];
         escAction = [];
         escLinker = [];
+        pendingFunction = '';
         scope = ['global'];
         for(i = 0; i < tokens.length; i++) {
             noAction = true;
             oldScope = [...scope];
             if(tokens[i].type == 'name') {
+                if(tokens[i].value == 'function' || tokens[i].value == 'procedure') {
+                    noAction = false;
+                    while(tokens[i].type != 'paren' || tokens[i].value != ')') {
+                        pendingFunction += tokens[i].value + ' ';
+                        i++;
+                    }
+                    pendingFunction += '0';
+                }
                 if(tokens[i].value == 'begin') {
                     noAction = false;
                     if(scope[scope.length - 1] == 'global') {
-                        scope.push('main');
-                        escAction.push('');
-                        escLinker.push(null);
+                        if(pendingFunction == '') {
+                            last = new node(nodes, 'terminator', 'Начало');
+                            scope.push('main');
+                            escAction.push('');
+                            escLinker.push(null);
+                        }
+                        else {
+                            last = new node(nodes, 'terminator', pendingFunction);
+                            scope.push(pendingFunction);
+                            escAction.push('terminate');
+                            escLinker.push(null);
+                            pendingFunction = '';
+                        }
                     }
                     else {
                         scope.push('begin at token ' + i);
@@ -66,6 +84,14 @@ module.exports = {
                         escAction.pop();
                         escLinker.pop();
                     }
+                    if(escAction[escAction.length - 1] == 'terminate') {
+                        connect(last, new node(nodes, 'terminator', 'Конец'));
+                        scope.pop();
+                        esc.pop();
+                        escAction.pop();
+                        escLinker.pop();
+                    }
+
                     if(escAction[escAction.length - 1] == '') {
                         scope.pop();
                         esc.pop();

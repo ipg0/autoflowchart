@@ -1,5 +1,5 @@
 module.exports = {
-    dfs(nodes, links, start) {
+    dfs(nodes, links) {
         stack = [];
         used = [];
         for(i = 0; i < nodes.length; i++) {
@@ -19,7 +19,10 @@ module.exports = {
             });
             stack.pop();
         }
-        search(start);
+        nodes.forEach(node => {
+            if(node.type == 'incremental')
+                search();
+        });
         return links;
     }
 }
