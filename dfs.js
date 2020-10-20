@@ -19,10 +19,10 @@ module.exports = {
             });
             stack.pop();
         }
-        nodes.forEach(node => {
-            if(node.type == 'incremental')
-                search();
-        });
+        for(i = 0; i < nodes.length; i++) {
+            if(nodes[i].type == 'incremental')
+                search(i);
+        };
         return links;
     }
 }
