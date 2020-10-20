@@ -128,13 +128,13 @@ module.exports = {
                     i += 3;
                     from = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'to') {
-                        from += tokens[i].value;
+                        from += tokens[i].value + ' ';
                         i++;
                     }
                     to = '';
                     i++;
                     while(tokens[i].type != 'name' || tokens[i].value != 'do') {
-                        to += tokens[i].value;
+                        to += tokens[i].value + ' ';
                         i++;
                     }
                     esc.push(';');
@@ -149,7 +149,7 @@ module.exports = {
                     i++;
                     condition = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'do') {
-                        condition += tokens[i].value;
+                        condition += tokens[i].value + ' ';
                         i++;
                     }
                     esc.push(';');
@@ -175,7 +175,7 @@ module.exports = {
                     i++;
                     condition = '';
                     while(tokens[i].type != 'name' || (tokens[i].value != ';' && tokens[i].value != 'else')) {
-                        condition += tokens[i].value;
+                        condition += tokens[i].value + ' ';
                         i++;
                     }
                     i--;
@@ -195,7 +195,7 @@ module.exports = {
                     i++;
                     condition = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'then') {
-                        condition += tokens[i].value;
+                        condition += tokens[i].value + ' ';
                         i++;
                     }
                     esc.push(';');
@@ -239,7 +239,7 @@ module.exports = {
                     params = '';
                     i += 2;
                     while(tokens[i].type != 'paren' || tokens[i].value != ')') {
-                        params += tokens[i].value;                            
+                        params += tokens[i].value + ' ';                            
                         i++;
                     }
                     if(params != '')
@@ -254,7 +254,7 @@ module.exports = {
                     params = '';
                     i += 2;
                     while(tokens[i].type != 'paren' || tokens[i].value != ')') {
-                        params += tokens[i].value;
+                        params += tokens[i].value + ' ';
                         i++;
                     }
                     if(params != '')
@@ -267,7 +267,7 @@ module.exports = {
                 if(noAction && scope[scope.length - 1] != 'global') {
                     proc = '';
                     while(tokens[i].type != 'name' || tokens[i].value != ';') {
-                        proc += tokens[i].value;
+                        proc += tokens[i].value + ' ';
                         i++; 
                     }
                     i--;

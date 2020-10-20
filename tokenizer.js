@@ -38,8 +38,8 @@ module.exports = {
 					value += infile[i];
 					i++;
 			}
-			if(value.toLowerCase() == 'div') {tokens.push(new token('oper', ' div ')); i--; continue};
-			if(value.toLowerCase() == 'mod') {tokens.push(new token('oper', ' mod ')); i--; continue};
+			if(value.toLowerCase() == 'div') {tokens.push(new token('oper', 'div')); i--; continue};
+			if(value.toLowerCase() == 'mod') {tokens.push(new token('oper', 'mod')); i--; continue};
 			if(value != '') {tokens.push(new token('name', value.toLowerCase())); i--; continue};
 			if(infile[i] == '\'') {
 				i++;
