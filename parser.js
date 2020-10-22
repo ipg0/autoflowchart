@@ -36,6 +36,7 @@ module.exports = {
         esc = [];
         escAction = [];
         escLinker = [];
+        functions = [];
         pendingFunction = '';
         scope = ['global'];
         for(i = 0; i < tokens.length; i++) {
@@ -44,11 +45,11 @@ module.exports = {
             if(tokens[i].type == 'name') {
                 if(tokens[i].value == 'function' || tokens[i].value == 'procedure') {
                     noAction = false;
-                    while(tokens[i].type != 'paren' || tokens[i].value != ')') {
-                        pendingFunction += tokens[i].value + ' ';
+                    functions.push(tokens[i + 1].value);
+                    while(tokens[i].type != 'name' || tokens[i].value != ';') {
+                        pendingFunction += tokens[i].value;
                         i++;
                     }
-                    pendingFunction += '0';
                 }
                 if(tokens[i].value == 'begin') {
                     noAction = false;
@@ -154,13 +155,13 @@ module.exports = {
                     i += 3;
                     from = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'to') {
-                        from += tokens[i].value + ' ';
+                        from += tokens[i].value;
                         i++;
                     }
                     to = '';
                     i++;
                     while(tokens[i].type != 'name' || tokens[i].value != 'do') {
-                        to += tokens[i].value + ' ';
+                        to += tokens[i].value;
                         i++;
                     }
                     esc.push(';');
@@ -175,7 +176,7 @@ module.exports = {
                     i++;
                     condition = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'do') {
-                        condition += tokens[i].value + ' ';
+                        condition += tokens[i].value;
                         i++;
                     }
                     esc.push(';');
@@ -221,7 +222,7 @@ module.exports = {
                     i++;
                     condition = '';
                     while(tokens[i].type != 'name' || tokens[i].value != 'then') {
-                        condition += tokens[i].value + ' ';
+                        condition += tokens[i].value;
                         i++;
                     }
                     esc.push(';');
@@ -265,7 +266,7 @@ module.exports = {
                     params = '';
                     i += 2;
                     while(tokens[i].type != 'paren' || tokens[i].value != ')') {
-                        params += tokens[i].value + ' ';                            
+                        params += tokens[i].value;                            
                         i++;
                     }
                     if(params != '')
@@ -285,7 +286,7 @@ module.exports = {
                             parensOp++;
                         if(tokens[i].type == 'paren' && tokens[i].value == ')')
                             parensOp--;
-                        params += tokens[i].value + ' ';
+                        params += tokens[i].value;
                         i++;
                     }
                     if(params != '')
@@ -296,13 +297,20 @@ module.exports = {
                 }
 
                 if(noAction && scope[scope.length - 1] != 'global') {
+                    subprog = false;
+                    console.log(functions);
                     proc = '';
                     while(tokens[i].type != 'name' || (tokens[i].value != ';' && tokens[i].value != 'else')) {
-                        proc += tokens[i].value + ' ';
+                        if(functions.includes(tokens[i].value))
+                            subprog = true;
+                        proc += tokens[i].value;
                         i++; 
                     }
                     i--;
-                    last = connect(last, new node(nodes, 'process', proc));
+                    if(subprog)
+                        last = connect(last, new node(nodes, 'subprogram', proc));
+                    else
+                        last = connect(last, new node(nodes, 'process', proc));
                 }
             }
         }

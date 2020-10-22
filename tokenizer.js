@@ -19,12 +19,10 @@ module.exports = {
 			if(infile[i] == ';')
 				tokens.push(new token('name', infile[i]));
 			if(infile[i] == ',')
-				tokens.push(new token('comma', infile[i]));
+				tokens.push(new token('comma', ', '));
 			if(/[<>+\-*/=]/.test(infile[i]))
 				tokens.push(new token('oper', infile[i]));
 			let value = '';
-			if(infile[i] == '.')
-				tokens.push(new token('dot', infile[i]));
 			if(infile[i] == ':') {
 				if(infile)
 				tokens.push(new token('colon', infile[i]));
@@ -38,8 +36,12 @@ module.exports = {
 					value += infile[i];
 					i++;
 			}
-			if(value.toLowerCase() == 'div') {tokens.push(new token('oper', 'div')); i--; continue};
-			if(value.toLowerCase() == 'mod') {tokens.push(new token('oper', 'mod')); i--; continue};
+			if(value.toLowerCase() == 'div') {tokens.push(new token('oper', ' div ')); i--; continue};
+			if(value.toLowerCase() == 'mod') {tokens.push(new token('oper', ' mod ')); i--; continue};
+			if(value.toLowerCase() == 'not') {tokens.push(new token('oper', ' not ')); i--; continue};
+			if(value.toLowerCase() == 'and') {tokens.push(new token('oper', ' and ')); i--; continue};
+			if(value.toLowerCase() == 'or') {tokens.push(new token('oper', ' or ')); i--; continue};
+			if(value.toLowerCase() == 'xor') {tokens.push(new token('oper', ' xor ')); i--; continue};
 			if(value != '') {tokens.push(new token('name', value.toLowerCase())); i--; continue};
 			if(infile[i] == '\'') {
 				i++;

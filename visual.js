@@ -23,6 +23,7 @@ module.exports = {
             ctx.lineWidth = 5;
             x = wGlob / 2;
             y = 200;
+            variator = false;
             lbound = x;
 			rbound = x;
 			incScope = [];
@@ -52,6 +53,23 @@ module.exports = {
                     ctx.stroke();
                     node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
                     node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
+                }
+                if(node.type == 'subprogram') {
+                    ctx.beginPath();
+                    ctx.moveTo(x - w / 2 - 20, y - h / 2 - 20);
+                    ctx.lineTo(x + w / 2 + 20, y - h / 2 - 20);
+                    ctx.lineTo(x + w / 2 + 20, y + h / 2 + 20);
+                    ctx.lineTo(x - w / 2 - 20, y + h / 2 + 20);
+                    ctx.closePath();
+                    ctx.moveTo(x - w / 2 - 30, y - h / 2 - 20);
+                    ctx.lineTo(x + w / 2 + 30, y - h / 2 - 20);
+                    ctx.lineTo(x + w / 2 + 30, y + h / 2 + 20);
+                    ctx.lineTo(x - w / 2 - 30, y + h / 2 + 20);
+                    ctx.lineTo(x - w / 2 - 30, y - h / 2 - 20);
+                    ctx.stroke();
+                    node.then = {dir : 'down', x : Math.trunc(x), y : Math.trunc(y + h / 2 + 20)};
+                    node.par = {dir : 'up', x : Math.trunc(x), y : Math.trunc(y - h / 2 - 20)};
+                    node.w += 20;
                 }
                 if(node.type == 'data') {
                     node.w += 20;
@@ -196,7 +214,23 @@ module.exports = {
                     terminate = drawLine(destination, rbound, to.y - toOffs);
                     if(terminate) {rbound += 40; return};
                     rbound += 40;
-                } else if(from.dir != 'down' || to.dir != 'up' || ito != ifrom + 1) {
+                } else if(from.dir == 'down' && to.dir == 'up' && ito != ifrom + 1) {
+                    if(variator) {
+                        terminate = drawLine(destination, lbound, from.y + fromOffs);
+                        if(terminate) {lbound -= 40; return};
+                        terminate = drawLine(destination, lbound, to.y - toOffs);
+                        if(terminate) {lbound -= 40; return};
+                        lbound -= 40;
+                    }
+                    else {
+                        terminate = drawLine(destination, rbound, from.y + fromOffs);
+                        if(terminate) {rbound += 40; return};
+                        terminate = drawLine(destination, rbound, to.y - toOffs);
+                        if(terminate) {rbound += 40; return};
+                        rbound += 40;
+                    }
+                }
+                else if(from.dir != 'down' || to.dir != 'up' || ito != ifrom + 1) {
                     let opt;
                     pinc = 0;
                     if(ifrom < ito)
@@ -263,6 +297,7 @@ module.exports = {
                     return 1;
             });
             for(let i = 0; i < links.length; i++) {
+                variator = !variator;
 				link = links[i];
                 if(link.type == 'then')
                     from = nodes[link.from].then;

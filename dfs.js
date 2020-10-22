@@ -20,7 +20,7 @@ module.exports = {
             stack.pop();
         }
         for(i = 0; i < nodes.length; i++) {
-            if(nodes[i].type == 'incremental')
+            if(nodes[i].type == 'terminator')
                 search(i);
         };
         return links;
