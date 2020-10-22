@@ -279,7 +279,12 @@ module.exports = {
                     noAction = false;
                     params = '';
                     i += 2;
-                    while(tokens[i].type != 'paren' || tokens[i].value != ')') {
+                    parensOp = 0;
+                    while(parensOp != 0 || tokens[i].type != 'paren' || tokens[i].value != ')') {
+                        if(tokens[i].type == 'paren' && tokens[i].value == '(')
+                            parensOp++;
+                        if(tokens[i].type == 'paren' && tokens[i].value == ')')
+                            parensOp--;
                         params += tokens[i].value + ' ';
                         i++;
                     }
@@ -292,7 +297,7 @@ module.exports = {
 
                 if(noAction && scope[scope.length - 1] != 'global') {
                     proc = '';
-                    while(tokens[i].type != 'name' || tokens[i].value != ';') {
+                    while(tokens[i].type != 'name' || (tokens[i].value != ';' && tokens[i].value != 'else')) {
                         proc += tokens[i].value + ' ';
                         i++; 
                     }
