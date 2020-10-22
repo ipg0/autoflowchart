@@ -20,7 +20,7 @@ module.exports = {
 				tokens.push(new token('name', infile[i]));
 			if(infile[i] == ',')
 				tokens.push(new token('comma', ', '));
-			if(/[<>+\-*/=]/.test(infile[i]))
+			if(/[<>+\-*/=^]/.test(infile[i]))
 				tokens.push(new token('oper', infile[i]));
 			let value = '';
 			if(infile[i] == ':') {

@@ -13,8 +13,6 @@ tokens = sanitize(tokens);
 
 [nodes, links] = parse(tokens);
 
-console.log(nodes);
-
 links = dfs(nodes, links);
 
 visualize(nodes, links, process.argv[3]);

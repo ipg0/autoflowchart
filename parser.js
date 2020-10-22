@@ -46,10 +46,11 @@ module.exports = {
                 if(tokens[i].value == 'function' || tokens[i].value == 'procedure') {
                     noAction = false;
                     functions.push(tokens[i + 1].value);
-                    while(tokens[i].type != 'name' || tokens[i].value != ';') {
+                    while(tokens[i].type != 'paren' || tokens[i].value != ')') {
                         pendingFunction += tokens[i].value;
                         i++;
                     }
+                    pendingFunction += ')';
                 }
                 if(tokens[i].value == 'begin') {
                     noAction = false;
