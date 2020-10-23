@@ -47,7 +47,7 @@ module.exports = {
                     noAction = false;
                     functions.push(tokens[i + 1].value);
                     while(tokens[i].type != 'paren' || tokens[i].value != ')') {
-                        pendingFunction += tokens[i].value;
+                        pendingFunction += tokens[i].value + ' ';
                         i++;
                     }
                     pendingFunction += ')';
@@ -87,7 +87,7 @@ module.exports = {
                         escLinker.pop();
                     }
                     if(escAction[escAction.length - 1] == 'terminate') {
-                        connect(last, new node(nodes, 'terminator', 'Конец'));
+                        connect(last, new node(nodes, 'terminator', 'Return'));
                         scope.pop();
                         esc.pop();
                         escAction.pop();
