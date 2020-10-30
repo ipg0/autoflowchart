@@ -155,7 +155,7 @@ module.exports = {
                     ctr = tokens[i].value;
                     i += 3;
                     from = '';
-                    while(tokens[i].type != 'name' || tokens[i].value != 'to') {
+                    while(tokens[i].type != 'name' || tokens[i].value != 'to' && tokens[i].value != 'downto') {
                         from += tokens[i].value;
                         i++;
                     }
