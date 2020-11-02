@@ -15,7 +15,7 @@ module.exports = {
 				ltxt = node.text;
 		});
 		hGlob += 200;
-		wGlob = ltxt.length * 20 + 1000;
+		wGlob = ltxt.length * 20 + 1000 + 0.1 * hGlob;
         img = pureimage.make(wGlob, hGlob);
         ctx = img.getContext('2d');
         var fnt = pureimage.registerFont('fonts/7454.ttf','Times New Roman');
@@ -24,8 +24,8 @@ module.exports = {
             x = wGlob / 2;
             y = 200;
             variator = false;
-            lbound = x;
-			rbound = x;
+            albound = [];
+            arbound = [];
 			incScope = [];
             let lines = [];
             let nLines = [];
@@ -181,6 +181,8 @@ module.exports = {
             }
 
             function drawLink(from, to, ifrom, ito, destination) {
+                lbound = albound[nodes[ifrom].scope];
+                rbound = arbound[nodes[ifrom].scope];
                 lpref = 0;
                 toOffs = 0;
                 fromOffs = 0;
@@ -281,13 +283,20 @@ module.exports = {
                 }
                 ctx.stroke();
                 mergeLines();
+                albound[nodes[ifrom].scope] = lbound;
+                arbound[nodes[ifrom].scope] = rbound;
             }
             nodes.forEach(node => {
                 drawNode(node, x, y);
+                if(node.type == 'terminator' && node.text != 'Return' && node.text != 'Конец') {
+                    albound.push(x - node.w / 2 + 40);
+                    arbound.push(x + node.w / 2 + 40);
+                }
+                node.scope = albound.length - 1;
                 node.y = y;
 				y += node.h + 150;
-				lbound = Math.min(lbound, x - node.w / 2 - 20);
-				rbound = Math.max(rbound, x + node.w / 2 + 20);
+				albound[albound.length - 1] = Math.min(albound[albound.length - 1], x - node.w / 2 - 20);
+				arbound[arbound.length - 1] = Math.max(arbound[arbound.length - 1], x + node.w / 2 + 20);
 				node.inBetween = 30;
             });
             links = links.sort(function cmp(a, b) {
