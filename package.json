@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/notblank00/autoflowchart#readme",
   "dependencies": {
-    "fs": "0.0.1-security",
-    "pureimage": "^0.2.5"
+    "canvas": "^2.6.1",
+    "fs": "0.0.1-security"
   }
 }
