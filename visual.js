@@ -241,7 +241,7 @@ module.exports = {
                         inc = -1;
                         pinc = -1;
                     }
-                    for(i = ifrom + pinc; i != ito + inc; i += inc)
+                    for(i = ifrom + pinc; i != ito + inc - pinc; i += inc)
                         if(!opt || nodes[i].inBetween < nodes[opt].inBetween)
                             opt = i;
                     if(from.dir == 'left') {
