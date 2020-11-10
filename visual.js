@@ -131,52 +131,12 @@ module.exports = {
             }
         }
 
-        function intersects(x1, y1, x2, y2, x3, y3, x4, y4) {
-            if (x1 == x2)
-                orientation1 = 'vertical';
-            else
-                orientation1 = 'horizontal';
-            if (x3 == x4)
-                orientation2 = 'vertical';
-            else
-                orientation2 = 'horizontal';
-            if (orientation1 == orientation2) {
-                return false;
-            }
-            if (x1 > x2)
-                [x1, x2] = [x2, x1];
-            if (y1 > y2)
-                [y1, y2] = [y2, y1];
-            if (x3 > x4)
-                [x3, x4] = [x4, x3];
-            if (y3 > y4)
-                [y3, y4] = [y4, y3];
-            if (orientation1 == 'vertical') {
-                return (y1 <= y3 && y2 >= y3 && x3 <= x1 && x4 >= x1);
-            }
-            else {
-                return (y3 <= y1 && y4 >= y1 && x1 <= x3 && x1 >= x3);
-            }
-        }
-
-        function mergeLines() {
-            nLines.forEach(line => {
-                lines.push(line);
-            });
-            nLines = [];
-        }
-
-        function drawLine(destination, x, y) {
-            ctx.lineTo(x, y);
-            return false;
-        }
-
-        function drawLink(from, to, ifrom, ito, destination) {
+        function drawLink(from, to, ifrom, ito) {
             lbound = albound[nodes[ifrom].scope];
             rbound = arbound[nodes[ifrom].scope];
             lpref = 0;
             fromOffs = 0;
-            terminate = false;
+            false;
             ctx.beginPath();
             ctx.moveTo(from.x, from.y);
             if (from.dir == 'left')
@@ -191,34 +151,28 @@ module.exports = {
                 lpref--;
             if (to.dir == 'up' && !to.offs)
                 to.offs = 20;
-            terminate = drawLine(destination, from.x, from.y + fromOffs);
-            if (terminate) { return };
+            toOffs = to.offs;
+            if(!toOffs)
+                toOffs = 0;
+            ctx.lineTo(from.x, from.y + fromOffs);
             if (lpref > 0) {
-                terminate = drawLine(destination, lbound, from.y + fromOffs);
-                if (terminate) { lbound -= 40; return };
-                terminate = drawLine(destination, lbound, to.y - to.offs);
-                if (terminate) { lbound -= 40; return };
+                ctx.lineTo(lbound, from.y + fromOffs);
+                ctx.lineTo(lbound, to.y - toOffs);
                 lbound -= 40;
             }
             else if (lpref < 0) {
-                terminate = drawLine(destination, rbound, from.y + fromOffs);
-                if (terminate) { rbound += 40; return };
-                terminate = drawLine(destination, rbound, to.y - to.offs);
-                if (terminate) { rbound += 40; return };
+                ctx.lineTo(rbound, from.y + fromOffs);
+                ctx.lineTo(rbound, to.y - toOffs);
                 rbound += 40;
             } else if (from.dir == 'down' && to.dir == 'up' && ito != ifrom + 1) {
                 if (variator) {
-                    terminate = drawLine(destination, lbound, from.y + fromOffs);
-                    if (terminate) { lbound -= 40; return };
-                    terminate = drawLine(destination, lbound, to.y - to.offs);
-                    if (terminate) { lbound -= 40; return };
+                    ctx.lineTo(lbound, from.y + fromOffs);
+                    ctx.lineTo(lbound, to.y - toOffs);
                     lbound -= 40;
                 }
                 else {
-                    terminate = drawLine(destination, rbound, from.y + fromOffs);
-                    if (terminate) { rbound += 40; return };
-                    terminate = drawLine(destination, rbound, to.y - to.offs);
-                    if (terminate) { rbound += 40; return };
+                    ctx.lineTo(rbound, from.y + fromOffs);
+                    ctx.lineTo(rbound, to.y - toOffs);
                     rbound += 40;
                 }
             }
@@ -235,44 +189,23 @@ module.exports = {
                     if (!opt || nodes[i].inBetween < nodes[opt].inBetween)
                         opt = i;
                 if (from.dir == 'left') {
-                    terminate = drawLine(destination, lbound, from.y + fromOffs);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, rbound, to.y - to.offs);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
+                    ctx.lineTo(lbound, from.y + fromOffs);
+                    ctx.lineTo(lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                    ctx.lineTo(rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                    ctx.lineTo(rbound, to.y - toOffs);
                 }
                 else {
-                    terminate = drawLine(destination, rbound, from.y + fromOffs);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
-                    terminate = drawLine(destination, lbound, to.y - to.offs);
-                    if (terminate) { lbound -= 40; rbound += 40; return };
+                    ctx.lineTo(rbound, from.y + fromOffs);
+                    ctx.lineTo(rbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                    ctx.lineTo(lbound, nodes[opt].y + nodes[opt].h / 2 + nodes[opt].inBetween);
+                    ctx.lineTo(lbound, to.y - toOffs);
                 }
                 rbound += 40;
                 lbound -= 40;
             }
-            terminate = drawLine(destination, to.x, to.y - to.offs);
-            if (terminate) { return };
-            terminate = drawLine(destination, to.x, to.y);
-            if (terminate) { return };
-            /*if (to.dir == 'left') {
-                ctx.lineTo(to.x - 15, to.y - 5);
-                ctx.moveTo(to.x, to.y);
-                ctx.lineTo(to.x - 15, to.y + 5);
-            }
-            else {
-                ctx.lineTo(to.x - 5, to.y - 15);
-                ctx.moveTo(to.x, to.y);
-                ctx.lineTo(to.x + 5, to.y - 15);
-            }*/
+            ctx.lineTo(to.x, to.y - toOffs);
+            ctx.lineTo(to.x, to.y);
             ctx.stroke();
-            mergeLines();
             albound[nodes[ifrom].scope] = lbound;
             arbound[nodes[ifrom].scope] = rbound;
             to.offs += 20;
@@ -307,7 +240,7 @@ module.exports = {
                 to = nodes[link.to].loop;
             else
                 to = nodes[link.to].par;
-            drawLink(from, to, link.from, link.to, to);
+            drawLink(from, to, link.from, link.to);
         };
         canvas.createPNGStream().pipe(fs.createWriteStream(file));
         return;

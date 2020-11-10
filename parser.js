@@ -299,7 +299,6 @@ module.exports = {
 
                 if(noAction && scope[scope.length - 1] != 'global') {
                     subprog = false;
-                    console.log(functions);
                     proc = '';
                     while(tokens[i].type != 'name' || (tokens[i].value != ';' && tokens[i].value != 'else')) {
                         if(functions.includes(tokens[i].value))
